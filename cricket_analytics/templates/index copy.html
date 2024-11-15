@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Analytics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            text-align: center;
+            background-image: url("{{ url_for('static', filename='cricket_team.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            overflow: auto; /* Allow scrolling if necessary */
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            border: 2px dashed #007bff;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        input[type="file"]:hover {
+            border-color: #0056b3;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px 0;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        video {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        img {
+            margin-top: 10px;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 8px;
+            display: block; /* Initially hide images */
+        }
+        .analytics {
+            margin-top: 20px;
+        }
+        .graph-section {
+            margin: 10px 0; /* Added vertical margin */
+        }
+        footer {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- <div class="container">
+        <h1>Cricket Video Analytics</h1>
+        <form id="uploadForm" action="{{ url_for('upload_video') }}", method="POST", enctype="multipart/form-data">
+            <input type="file" id="videoInput" name="video" accept="video/*" required>
+            <button type="submit">Upload Video</button>
+        </form>
+
+    
+        <div class="container" style="display: flex; justify-content: center; align-items: flex-start; gap: 20px;">
+            Left: Other Analytics -->
+            <div class="analytics other-analytics" style="flex: 1;">
+                <h3>Other Analytics</h3>
+                <div class="other-section">
+                    <button type="button" onclick="toggleDisplay('bounced_frame')">Bounced Ball Frame</button>
+                    <img id="bounced_frame" src="{{ url_for('static', filename='bounced_frame.jpg') }}" alt="Bounced Frame Image" style="display:none;">
+                </div>
+                <div class="other-section">
+                    <button type="button" onclick="toggleDisplay('optimal_bounced_frame')">Optimal Bounce Position Analysis</button>
+                    <img id="optimal_bounced_frame" src="{{ url_for('static', filename='optimal_bounced_frame.jpg') }}" alt="Optimal Bounced Frame Image" style="display:none;">
+                </div>
+            </div>
+        
+            <!-- Center: Video Input Form -->
+            <div class="video-input" style="flex: 1; text-align: center;">
+                <h1>Cricket Video Analytics</h1>
+                <form id="uploadForm" action="{{ url_for('upload_video') }}" method="POST" enctype="multipart/form-data">
+                    <input type="file" id="videoInput" name="video" accept="video/*" required>
+                    <button type="submit">Upload Video</button>
+                </form>
+        
+                <!-- Container for displaying processed video -->
+                <div id="videoContainer" style="margin-top: 20px;">
+                    {% if vid %}
+                    <img id="sidebar-video" src="{{ vid_url }}" alt="Video Feed">
+                    {% endif %}
+                </div>
+            </div>
+        
+            <!-- Right: Graphs Section -->
+            <div class="analytics graph-analytics" style="flex: 1;">
+                <h3>Graphs</h3>
+                <div class="graph-section">
+                    <button type="button" onclick="showGraph('frame_id_vs_cx.png')">Horizontal motion of ball</button>
+                    <img id="graph_frame_id_vs_cx" alt="Frame ID vs CX Graph">
+                </div>
+                <div class="graph-section">
+                    <button type="button" onclick="showGraph('frame_id_vs_cy.png')">Vertical motion of ball</button>
+                    <img id="graph_frame_id_vs_cy" alt="Frame ID vs CY Graph">
+                </div>
+                <div class="graph-section">
+                    <button type="button" onclick="showGraph('cx_vs_cy.png')">Horizontal and Vertical motion of ball</button>
+                    <img id="graph_cx_vs_cy" alt="CX vs CY Graph">
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <script>
+            function toggleDisplay(imgId) {
+                const imgElement = document.getElementById(imgId);
+                // Toggle the display between "block" and "none"
+                imgElement.style.display = (imgElement.style.display === "none" || imgElement.style.display === "") ? "block" : "none";
+            }
+        </script>
+        
+        
+        
+               
+        
+      
+        <footer>
+            <p>© 2024 Cricket Analytics. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+    function uploadVideo() {
+    const videoInput = document.getElementById('videoInput').files[0];
+    if (!videoInput) {
+        alert("Please select a video file to upload.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('video', videoInput);
+
+    // Upload video to the server
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Check if the server provided the URL to the processed video
+        if (data.video_url) {
+            const videoContainer = document.getElementById('videoContainer');
+            videoContainer.innerHTML = `
+                <h3>Processed Video</h3>
+                <video controls autoplay>
+                    <source src="${data.video_url}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+        } else {
+            alert('Failed to load video. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error uploading video:', error);
+        alert('An error occurred while processing the video.');
+    });
+}
+        function showGraph(graphFileName) {
+            const graphId = `graph_${graphFileName.split('.')[0]}`; // Generate unique ID for each graph
+            const imgElement = document.getElementById(graphId);
+            
+            if (imgElement) {
+                imgElement.src = `/static/${graphFileName}`;
+                imgElement.style.display = 'block'; // Show the image
+            }
+        }
+    </script>
+</body>
+</html>

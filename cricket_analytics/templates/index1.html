@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 30%;
+            background-color: rgba(128, 128, 128, 0.8);
+            padding: 20px;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 2;
+        }
+
+        /* Main content styling */
+        .container {
+            width: 70%;
+            padding: 20px;
+        }
+
+        /* Video display in sidebar */
+        #sidebar-video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar with Video Feed -->
+    <div class="sidebar">
+        <h2>Video Feed</h2>
+        <img id="sidebar-video" src="{{ url_for('video_feed') }}" alt="Video Feed">
+        <!-- Add additional content or analytics here -->
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Upload Video for Processing</h1>
+        <form action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="video" accept="video/*" required>
+            <button type="submit">Upload Video</button>
+        </form>
+    </div>
+
+</body>
+</html>

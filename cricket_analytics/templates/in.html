@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Analytics</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-image: url("{{ url_for('static', filename='cricket_team.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-attachment: fixed;
+        }
+
+        .sidebar, .right-sidebar {
+            background-color: rgba(0, 0, 0, 0.5); /* Dark background for contrast */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 25%;
+            max-width: 300px;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .sidebar {
+            align-items: flex-start;
+        }
+
+        .right-sidebar {
+            align-items: flex-end;
+            position: fixed;
+            right: 0;
+            height: 100%;
+            box-shadow: -10px 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-right: 320px; /* Reserve space for right sidebar */
+            color: #fff;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            border: 2px dashed #800000;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            color: #333;
+            font-size: 1rem;
+            background-color: #fff;
+        }
+
+        input[type="file"]:hover {
+            border-color: #4B0000;
+        }
+
+        button {
+            background-color: #800000;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        button:hover {
+            background-color: #e26868;
+        }
+
+        h3, p {
+            color: #f0f0f0;
+            font-size: 1.2rem;
+        }
+
+        img, video {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 700px;
+            border-radius: 12px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        img:hover, video:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        /* Responsive Design for Mobile */
+        @media screen and (max-width: 768px) {
+            .sidebar, .right-sidebar {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .content {
+                margin-right: 0;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            button {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Custom Scrollbar Styling */
+        .sidebar, .right-sidebar {
+            overflow-y: auto;
+        }
+        
+        .sidebar::-webkit-scrollbar, .right-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb, .right-sidebar::-webkit-scrollbar-thumb {
+            background-color: #800000;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+    
+    <!-- Left Sidebar with options -->
+    <div class="sidebar">
+        <h3>Pitch Mapping Analysis</h3>
+        <button type="button" onclick="toggleDisplay('bounced_frame')">Bounced Ball Frame</button>
+        <img id="bounced_frame" src="{{ url_for('static', filename='bounced_frame.jpg') }}" alt="Bounced Frame Image" style="display:none;">
+        
+        <button type="button" onclick="toggleDisplay('optimal_bounced_frame')">Optimal Bounce Position Analysis</button>
+        <img id="optimal_bounced_frame" src="{{ url_for('static', filename='optimal_bounced_frame.jpg') }}" alt="Optimal Bounced Frame Image" style="display:none;">
+
+        <h3>Graphical Ball Motion Analysis</h3>
+        <button type="button" onclick="showGraph('frame_id_vs_cx.png')">Ball Lateral Movement Insights</button>
+        <img id="graph_frame_id_vs_cx" style="display:none;">
+        
+        <button type="button" onclick="showGraph('frame_id_vs_cy.png')">Ball Vertical Movement Insights</button>
+        <img id="graph_frame_id_vs_cy" style="display:none;">
+        
+        <button type="button" onclick="showGraph('cx_vs_cy.png')">Ball Trajectory Dynamics</button>
+        <img id="graph_cx_vs_cy" style="display:none;">
+    </div>
+
+    <!-- Main content area -->
+    <div class="content">
+        <h1>Cricket Video Analytics</h1>
+        
+        <!-- Video upload form -->
+        <form id="uploadForm" action="{{ url_for('upload_video') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" id="videoInput" name="video" accept="video/*" required>
+            <button type="submit">Upload Video</button>
+        </form>
+
+        <!-- Display processed video -->
+        <div id="videoContainer">
+            {% if vid %}
+                <img id="sidebar-video" src="{{ vid_url1 }}" alt="Video Feed">
+            {% endif %}
+        </div>
+
+        <!-- Ball tracking -->
+        <div>
+            <button onclick="trackball('{{ vid_url2 }}')">Ball Tracking</button>
+            <div id="videoContainer1" style="margin-top: 30px;">
+                {% if vid %}
+                    <img id="sidebar-video" src="{{ vid_url2 }}" alt="Video Feed" style="display: none;">
+                {% endif %}
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2024 Cricket Analytics. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Right Sidebar for additional frames -->
+    <div class="right-sidebar">
+        <h3>Additional Frames</h3>
+        <button type="button" onclick="toggleDisplay('frame1')">Frame 1</button>
+        <img id="frame1" src="{{ url_for('static', filename='segmented_bounce_to_hit_frame_2.jpg') }}" alt="Frame 1 Image" style="display:none;">
+
+        <button type="button" onclick="toggleDisplay('frame2')">Frame 2</button>
+        <img id="frame2" src="{{ url_for('static', filename='segmented_bounce_to_hit_frame_3.jpg') }}" alt="Frame 2 Image" style="display:none;">
+
+        <button type="button" onclick="toggleDisplay('frame3')">Frame 3</button>
+        <img id="frame3" src="{{ url_for('static', filename='segmented_bounce_to_hit_frame_4.jpg') }}" alt="Frame 3 Image" style="display:none;">
+
+        <button type="button" onclick="toggleDisplay('frame4')">Frame 4</button>
+        <img id="frame4" src="{{ url_for('static', filename='segmented_bounce_to_hit_frame_5.jpg') }}" alt="Frame 4 Image" style="display:none;">
+    </div>
+
+    <script>
+        function toggleDisplay(imgId) {
+            const imgElement = document.getElementById(imgId);
+            imgElement.style.display = (imgElement.style.display === "none" || imgElement.style.display === "") ? "block" :
